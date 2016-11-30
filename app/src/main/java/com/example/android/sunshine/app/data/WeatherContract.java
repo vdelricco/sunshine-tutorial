@@ -18,6 +18,11 @@ package com.example.android.sunshine.app.data;
 import android.provider.BaseColumns;
 import android.text.format.Time;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+
 /**
  * Defines table and column names for the weather database.
  */
@@ -27,10 +32,30 @@ public class WeatherContract {
     // the database to the start of the the Julian day at UTC.
     public static long normalizeDate(long startDate) {
         // normalize the start date to the beginning of the (UTC) day
+        if (Integer.valueOf(android.os.Build.VERSION.SDK_INT) < 22) {
+            return getTimeBelowApi22(startDate);
+        } else {
+            return getTimeApi22Above(startDate);
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    public static long getTimeBelowApi22(long startDate) {
         Time time = new Time();
         time.set(startDate);
         int julianDay = Time.getJulianDay(startDate, time.gmtoff);
         return time.setJulianDay(julianDay);
+    }
+
+    public static long getTimeApi22Above(long startDate) {
+        GregorianCalendar date = (GregorianCalendar) GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
+        date.setTime(new Date(startDate));
+        date.set(Calendar.HOUR_OF_DAY, 0);
+        date.set(Calendar.MINUTE, 0);
+        date.set(Calendar.SECOND, 0);
+        date.set(Calendar.MILLISECOND, 0);
+
+        return date.getTimeInMillis();
     }
 
     /*
@@ -40,6 +65,14 @@ public class WeatherContract {
      */
     public static final class LocationEntry implements BaseColumns {
         public static final String TABLE_NAME = "location";
+
+        public static final String COLUMN_LOCATION_SETTING = "location_setting";
+
+        public static final String COLUMN_CITY_NAME= "city_name";
+
+        public static final String COLUMN_COORD_LAT= "coord_lat";
+
+        public static final String COLUMN_COORD_LONG= "coord_long";
 
     }
 
