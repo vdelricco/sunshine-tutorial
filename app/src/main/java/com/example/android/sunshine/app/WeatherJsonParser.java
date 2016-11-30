@@ -1,5 +1,8 @@
 package com.example.android.sunshine.app;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.text.format.Time;
 import android.util.Log;
 
@@ -10,6 +13,12 @@ import org.json.JSONObject;
 import java.text.SimpleDateFormat;
 
 public class WeatherJsonParser {
+
+    private Context context;
+
+    public WeatherJsonParser(Context context) {
+        this.context = context;
+    }
 
     private final String TAG = this.getClass().getName();
 
@@ -30,6 +39,15 @@ public class WeatherJsonParser {
         // For presentation, assume the user doesn't care about tenths of a degree.
         long roundedHigh = Math.round(high);
         long roundedLow = Math.round(low);
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String tempUnits = preferences.getString(context.getString(R.string.settings_temp_units_key), "0");
+        Log.v(TAG, "TEMP UNITS = " + tempUnits);
+
+        if (tempUnits == context.getString(R.string.settings_temp_units_fahrenheit)) {
+            roundedHigh = (long)(roundedHigh * 1.8) + 32;
+            roundedLow = (long)(roundedLow * 1.8) + 32;
+        }
 
         String highLowStr = roundedHigh + "/" + roundedLow;
         return highLowStr;

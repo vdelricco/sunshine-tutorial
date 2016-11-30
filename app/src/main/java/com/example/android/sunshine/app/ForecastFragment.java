@@ -1,31 +1,35 @@
 package com.example.android.sunshine.app;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.util.ArrayList;
 
-public class ForecastFragment extends Fragment {
+public class ForecastFragment extends Fragment implements AdapterView.OnItemClickListener {
 
     private final String TAG = this.getClass().getName();
 
     private ArrayList<String> forecastData = new ArrayList<>();
     private ArrayAdapter<String> dataAdapter;
+    private SharedPreferences preferences;
 
     public ForecastFragment() {}
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         setHasOptionsMenu(true);
+        preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         super.onCreate(savedInstanceState);
     }
 
@@ -40,12 +44,17 @@ public class ForecastFragment extends Fragment {
         // handle item selection
         switch (item.getItemId()) {
             case R.id.action_refresh:
-                Log.v(TAG, "fetching weather");
-                new FetchWeatherTask(this).execute("80205");
+                runWeatherTask();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void onResume() {
+        runWeatherTask();
+        super.onResume();
     }
 
     @Override
@@ -56,9 +65,18 @@ public class ForecastFragment extends Fragment {
         dataAdapter = new ArrayAdapter<>(getActivity(), R.layout.list_item_forecast, R.id.list_item_forecast_textview, forecastData);
         ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
         listView.setAdapter(dataAdapter);
-        new FetchWeatherTask(this).execute("80205");
+        listView.setOnItemClickListener(this);
 
         return rootView;
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        DetailActivity.start(this.getActivity(), forecastData.get(position));
+    }
+
+    private void runWeatherTask() {
+        new FetchWeatherTask(this).execute(preferences.getString(getString(R.string.settings_location_key), "error"));
     }
 
     public void onForecastDataUpdated(String[] data) {

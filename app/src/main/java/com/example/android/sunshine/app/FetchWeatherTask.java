@@ -19,6 +19,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
     public FetchWeatherTask(ForecastFragment forecastFragment) {
         this.forecastFragment = forecastFragment;
     }
+    private FetchWeatherTask() {}
 
     private final String TAG = this.getClass().getName();
 
@@ -103,7 +104,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
         }
 
         try {
-            return new WeatherJsonParser().getWeatherDataFromJson(forecastJsonStr, 7);
+            return new WeatherJsonParser(forecastFragment.getActivity()).getWeatherDataFromJson(forecastJsonStr, 7);
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
