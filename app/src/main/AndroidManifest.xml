@@ -30,6 +30,9 @@
             android:name=".SettingsActivity"
             android:label="Settings">
         </activity>
+        <provider
+            android:authorities="com.example.android.sunshine.app"
+            android:name=".data.WeatherProvider"/>
     </application>
 
 </manifest>

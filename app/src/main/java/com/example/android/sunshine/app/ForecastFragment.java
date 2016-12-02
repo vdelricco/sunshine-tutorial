@@ -76,14 +76,7 @@ public class ForecastFragment extends Fragment implements AdapterView.OnItemClic
     }
 
     private void runWeatherTask() {
-        new FetchWeatherTask(this).execute(preferences.getString(getString(R.string.settings_location_key), "error"));
+        new FetchWeatherTask(this.getActivity(), dataAdapter).execute(preferences.getString(getString(R.string.settings_location_key), "error"));
     }
 
-    public void onForecastDataUpdated(String[] data) {
-        forecastData.clear();
-        for (String forecast : data) {
-            forecastData.add(forecast);
-        }
-        dataAdapter.notifyDataSetChanged();
-    }
 }
