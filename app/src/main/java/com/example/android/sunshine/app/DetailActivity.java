@@ -13,30 +13,25 @@ public class DetailActivity extends AppCompatActivity {
 
     private static final String EXTRA_WEATHER_DATA = "com.example.android.sunshine.app.extra.weatherdata";
     private String weatherData;
-
     ShareActionProvider shareActionProvider;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent intent = this.getIntent();
-        weatherData = intent.getStringExtra(EXTRA_WEATHER_DATA);
+        if (intent != null) {
+            weatherData = intent.getDataString();
+            updateShareIntent(weatherData);
+        }
+
         setContentView(R.layout.activity_detail);
 
-        Intent shareIntent = new Intent();
-        shareIntent.setAction(Intent.ACTION_SEND);
-        shareIntent.putExtra(Intent.EXTRA_TEXT, weatherData + "#SunshineApp");
-        shareIntent.setType("text/plain");
-        setShareIntent(shareIntent);
-
         if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
+            getFragmentManager().beginTransaction()
                     .add(R.id.container, new DetailActivityFragment().newInstance(weatherData))
                     .commit();
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -62,6 +57,14 @@ public class DetailActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void updateShareIntent(String data) {
+        Intent shareIntent = new Intent();
+        shareIntent.setAction(Intent.ACTION_SEND);
+        shareIntent.putExtra(Intent.EXTRA_TEXT, weatherData + "#SunshineApp");
+        shareIntent.setType("text/plain");
+        setShareIntent(shareIntent);
     }
 
     // Call to update the share intent

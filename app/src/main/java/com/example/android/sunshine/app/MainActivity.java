@@ -3,7 +3,6 @@ package com.example.android.sunshine.app;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,14 +11,32 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
+    private final String FORECASTFRAGMENT_TAG = "FFTAG";
+    private String mLocation;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mLocation = Utility.getPreferredLocation(this);
         setContentView(R.layout.activity_main);
         if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new ForecastFragment())
+            getFragmentManager().beginTransaction()
+                    .add(R.id.container, new ForecastFragment(), FORECASTFRAGMENT_TAG)
                     .commit();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        String location = Utility.getPreferredLocation( this );
+        // update the location in our second pane using the fragment manager
+        if (location != null && !location.equals(mLocation)) {
+            ForecastFragment ff = (ForecastFragment)getFragmentManager().findFragmentByTag(FORECASTFRAGMENT_TAG);
+            if ( null != ff ) {
+                ff.onLocationChanged();
+            }
+            mLocation = location;
         }
     }
 
@@ -41,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.action_show_map:
                 Intent intent = new Intent(Intent.ACTION_VIEW);
-                String zipCode = PreferenceManager.getDefaultSharedPreferences(this).getString(getString(R.string.settings_location_key), "00000");
+                String zipCode = Utility.getPreferredLocation(this);
                 Uri geoLocation = Uri.parse("geo:0,0?").buildUpon()
                         .appendQueryParameter("q", zipCode)
                         .build();
